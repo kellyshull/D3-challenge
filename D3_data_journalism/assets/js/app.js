@@ -1,7 +1,25 @@
 // @TODO: YOUR CODE HERE!
+d3.select(window).on("resize", handleResize);
+
+loadChart();
+
+function handleResize() {
+    var svgArea = d3.select("svg");
+
+    // if there is already a svg container on page, remove it and reload chart
+
+    if (!svgArea.empty()) {
+        svgArea.remove();
+        loadChart();
+    }
+}
+
+
+
+function loadChart() {
 // Define SVG area dimensions
-var svgWidth = 960;
-var svgHeight = 560;
+var svgWidth = window.innerWidth - 5;
+var svgHeight = window.innerHeight - 5;
 
 // Define the chart's margins as an object
 var chartMargin = {
@@ -30,4 +48,6 @@ d3.csv("./assets/data/data.csv").then(healthData => {
 
     console.log(healthData);
 
-});
+}).catch(error => console.log(error));
+
+}
