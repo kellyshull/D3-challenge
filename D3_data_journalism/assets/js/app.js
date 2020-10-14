@@ -53,6 +53,33 @@ function loadChart() {
 
     // console.log(healthData);
 
+    // scale functions
+    var xLinearScale = d3.scaleLinear()
+                .domain([d3.min(healthData, d => d.age) - 5, d3.max(healthData, d => d.age) + 5 ])
+                .range([0, chartWidth]);
+    
+    var yLinearScale = d3.scaleLinear()
+                .domain([d3.min(healthData, d => d.smokes) - 5, d3.max(healthData, d => d.smokes) + 5 ])
+                .range([chartHeight, 0]);
+    
+    var bottomAxis = d3.axisBottom(xLinearScale);
+    var leftAxis = d3.axisLeft(yLinearScale);
+
+    chartGroup.append("g")
+      .attr("transform", `translate(0, ${chartHeight})`)
+      .call(bottomAxis);
+
+    chartGroup.append("g")
+      .call(leftAxis);
+    
+    // create circles 
+    var circleGroup = chartGroup.selectAll("circle")
+                      .data(healthData)
+                      .join("circle")
+                      .attr("cx", d => xLinearScale(d.age))
+                      .attr("cy", d => yLinearScale(d.smokes))
+                      ;
+
   }).catch(error => console.log(error));
 
 }
