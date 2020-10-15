@@ -33,6 +33,44 @@ function loadChart() {
   // Append a group to the SVG area and shift ('translate') it to the right and to the bottom
   var chartGroup = svg.append("g")
                   .attr("transform", `translate(${chartMargin.left}, ${chartMargin.top})`);
+  
+  
+var chosenXAxis = "age";
+
+// function used for updating x-scale var upon click on axis label
+function xScale(healthData, chosenXAxis) {
+  // create scales
+  var xLinearScale = d3.scaleLinear()
+    .domain([d3.min(healthData, d => d[chosenXAxis]) * 0.8,
+      d3.max(healthData, d => d[chosenXAxis]) * 1.2
+    ])
+    .range([0, chartWidth]);
+
+  return xLinearScale;
+
+}
+
+// function used for updating xAxis var upon click on axis label
+function renderAxes(newXScale, xAxis) {
+  var bottomAxis = d3.axisBottom(newXScale);
+
+  xAxis.transition()
+    .duration(1000)
+    .call(bottomAxis);
+
+  return xAxis;
+}
+
+// function used for updating circles group with a transition to
+// new circles
+function renderCircles(circlesGroup, newXScale, chosenXAxis) {
+
+  circlesGroup.transition()
+    .duration(1000)
+    .attr("cx", d => newXScale(d[chosenXAxis]));
+
+  return circlesGroup;
+}
 
   // Load data from data.csv
   d3.csv("./assets/data/data.csv").then(healthData => {
@@ -54,10 +92,10 @@ function loadChart() {
     // console.log(healthData);
 
     // scale functions
-    var xLinearScale = d3.scaleLinear()
-                .domain([d3.min(healthData, d => d.age) - 5, d3.max(healthData, d => d.age) + 5 ])
-                .range([0, chartWidth]);
-    
+    // var xLinearScale = d3.scaleLinear()
+    //             .domain([d3.min(healthData, d => d.age) - 5, d3.max(healthData, d => d.age) + 5 ])
+    //             .range([0, chartWidth]);
+    var xLinearScale = xScale(healthData, chosenXAxis)
     var yLinearScale = d3.scaleLinear()
                 .domain([d3.min(healthData, d => d.smokes) - 5, d3.max(healthData, d => d.smokes) + 5 ])
                 .range([chartHeight, 0]);
@@ -78,7 +116,16 @@ function loadChart() {
                       .join("circle")
                       .attr("cx", d => xLinearScale(d.age))
                       .attr("cy", d => yLinearScale(d.smokes))
-                      ;
+                      .attr("r", 15)
+                      .attr("class", "stateCircle");
+    
+    var textGroup = chartGroup.selectAll("text.stateText")
+                    .data(healthData)
+                    .join("text")
+                    .attr("x", d => xLinearScale(d.age))
+                    .attr("y", d => yLinearScale(d.smokes)+5)
+                    .text(d => (d.abbr))
+                    .attr("class", "stateText");
 
   }).catch(error => console.log(error));
 
