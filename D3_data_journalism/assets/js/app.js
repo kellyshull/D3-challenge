@@ -36,7 +36,7 @@ function loadChart() {
 
 
   var chosenXAxis = "age";
-  // var chosenYAxis = "smokes";
+  var chosenYAxis = "smokes";
 
   // function used for updating x-scale var upon click on axis label
   function xScale(healthData, chosenXAxis) {
@@ -60,6 +60,30 @@ function loadChart() {
       .call(bottomAxis);
 
     return xAxis;
+  }
+
+  // function used for update y-scale var upon click on axis label
+
+  function yScale(healthData, chosenYAxis) {
+    // create scales
+    var yLinearScale = d3.scaleLinear()
+      .domain([d3.min(healthData, d => d[chosenYAxis]) * 0.8,
+      d3.max(healthData, d => d[chosenYAxis]) * 1.2
+      ])
+      .range([chartHeight, 0]);
+
+    return yLinearScale;
+  }
+
+  // render function
+  function renderYaxis(newYscale, yAxis) {
+    var leftAxis = d3.axisLeft(newYScale);
+
+    yAxis.transition()
+      .duration(1000)
+      .call(leftAxis);
+
+    return yAxis;
   }
 
   // function used for updating circles group with a transition to
@@ -94,12 +118,15 @@ function loadChart() {
 
     // scale functions
     // var xLinearScale = d3.scaleLinear()
-    //             .domain([d3.min(healthData, d => d.age) - 5, d3.max(healthData, d => d.age) + 5 ])
-    //             .range([0, chartWidth]);
+    //   .domain([d3.min(healthData, d => d.age) - 5, d3.max(healthData, d => d.age) + 5 ])
+    //   .range([0, chartWidth]);
     var xLinearScale = xScale(healthData, chosenXAxis)
-    var yLinearScale = d3.scaleLinear()
-      .domain([d3.min(healthData, d => d.smokes) - 5, d3.max(healthData, d => d.smokes) + 5])
-      .range([chartHeight, 0]);
+
+    // var yLinearScale = d3.scaleLinear()
+    //   .domain([d3.min(healthData, d => d.smokes) - 5, d3.max(healthData, d => d.smokes) + 5])
+    //   .range([chartHeight, 0]);
+
+    var yLinearScale = yScale(healthData, chosenYAxis)
 
     var bottomAxis = d3.axisBottom(xLinearScale);
     var leftAxis = d3.axisLeft(yLinearScale);
@@ -115,16 +142,16 @@ function loadChart() {
     var circleGroup = chartGroup.selectAll("circle")
       .data(healthData)
       .join("circle")
-      .attr("cx", d => xLinearScale(d.age))
-      .attr("cy", d => yLinearScale(d.smokes))
+      .attr("cx", d => xLinearScale(d[chosenXAxis]))
+      .attr("cy", d => yLinearScale(d[chosenYAxis]))
       .attr("r", 15)
       .attr("class", "stateCircle");
 
     var textGroup = chartGroup.selectAll("text.stateText")
       .data(healthData)
       .join("text")
-      .attr("x", d => xLinearScale(d.age))
-      .attr("y", d => yLinearScale(d.smokes) + 5)
+      .attr("x", d => xLinearScale(d[chosenXAxis]))
+      .attr("y", d => yLinearScale(d[chosenYAxis]) + 5)
       .text(d => (d.abbr))
       .attr("class", "stateText");
 
@@ -145,6 +172,13 @@ function loadChart() {
       .attr("value", "poverty") // value to grab for event listener
       .classed("inactive", true)
       .text("Poverty (%)");
+
+    var incomeLabel = xLabelsGroup.append("text")
+      .attr("x", 0)
+      .attr("y", 60)
+      .attr("value", "income") // value to grab for event listener
+      .classed("inactive", true)
+      .text("Income (Median)");
 
   }).catch(error => console.log(error));
 
