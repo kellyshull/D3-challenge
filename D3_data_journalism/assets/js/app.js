@@ -155,7 +155,7 @@ function loadChart() {
       .text(d => (d.abbr))
       .attr("class", "stateText");
 
-    // Create group for two x-axis labels
+    // Create group for three x-axis labels
     var xLabelsGroup = chartGroup.append("g")
       .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + 20})`);
 
@@ -179,6 +179,10 @@ function loadChart() {
       .attr("value", "income") // value to grab for event listener
       .classed("inactive", true)
       .text("Income (Median)");
+    
+    // create y-labels group
+    var yLabelsGroup = chartGroup.append("g")
+      .attr("transform", "rotate(-90)")
 
   }).catch(error => console.log(error));
 
